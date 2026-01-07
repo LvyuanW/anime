@@ -44,8 +44,6 @@ export function User({ user }: { user: any }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
 
-  if (!user) return null
-
   const handleMenuClick = () => {
     if (isMobile) {
       setOpenMobile(false)

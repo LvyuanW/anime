@@ -1,6 +1,9 @@
 import uuid
+from datetime import datetime
+from typing import Any, Optional
 
 from pydantic import EmailStr
+from sqlalchemy import Column, DateTime, Index, JSON, func
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -111,3 +114,82 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+# Entity Extraction Models
+
+class Project(SQLModel, table=True):
+    uid: str = Field(primary_key=True)
+    name: str
+    description: str | None = None
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    updated_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True), onupdate=func.now()))
+
+class Script(SQLModel, table=True):
+    uid: str = Field(primary_key=True)
+    project_uid: str = Field(index=True)
+    name: str
+    content: str
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    updated_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True), onupdate=func.now()))
+
+class NormalizedScript(SQLModel, table=True):
+    __tablename__ = "normalized_script"
+    uid: str = Field(primary_key=True)
+    script_uid: str = Field(index=True)
+    version: str | None = None
+    content_json: Any = Field(sa_column=Column(JSON, nullable=False))
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+
+class ExtractionRun(SQLModel, table=True):
+    __tablename__ = "extraction_run"
+    uid: str = Field(primary_key=True)
+    project_uid: str = Field(index=True)
+    script_uid: str = Field(index=True)
+    step: int
+    status: str | None = None
+    model_config_data: Any | None = Field(default=None, sa_column=Column("model_config", JSON))
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    finished_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True)))
+
+class ArtifactSnapshot(SQLModel, table=True):
+    __tablename__ = "artifact_snapshot"
+    uid: str = Field(primary_key=True)
+    run_uid: str = Field(index=True)
+    content_json: Any = Field(sa_column=Column(JSON, nullable=False))
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+
+class CandidateEntity(SQLModel, table=True):
+    __tablename__ = "candidate_entity"
+    uid: str = Field(primary_key=True)
+    run_uid: str = Field(index=True)
+    raw_name: str
+    entity_type: str
+    confidence: float | None = None
+    canonical_asset_uid: str | None = Field(default=None, index=True)
+    is_deleted: bool = Field(default=False)
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+
+class CandidateEvidence(SQLModel, table=True):
+    __tablename__ = "candidate_evidence"
+    uid: str = Field(primary_key=True)
+    candidate_uid: str = Field(index=True)
+    line_id: str
+    quote: str
+    reason: str | None = None
+    is_deleted: bool = Field(default=False)
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+
+class CanonicalAsset(SQLModel, table=True):
+    __tablename__ = "canonical_asset"
+    __table_args__ = (Index("canonical_asset_project_uid_type_idx", "project_uid", "type"),)
+    uid: str = Field(primary_key=True)
+    project_uid: str = Field(index=True)
+    run_uid: str | None = Field(default=None, index=True)
+    name: str
+    type: str
+    aliases: Any | None = Field(default=None, sa_column=Column(JSON))
+    description: str | None = None
+    status: str
+    is_deleted: bool = Field(default=False)
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    updated_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True), onupdate=func.now()))
