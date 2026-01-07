@@ -55,6 +55,432 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const CandidateEntityPublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        run_uid: {
+            type: 'string',
+            title: 'Run Uid'
+        },
+        raw_name: {
+            type: 'string',
+            title: 'Raw Name'
+        },
+        entity_type: {
+            type: 'string',
+            title: 'Entity Type'
+        },
+        confidence: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Confidence'
+        },
+        canonical_asset_uid: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Canonical Asset Uid'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        evidences: {
+            items: {
+                '$ref': '#/components/schemas/CandidateEvidencePublic'
+            },
+            type: 'array',
+            title: 'Evidences',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['uid', 'run_uid', 'raw_name', 'entity_type', 'confidence', 'canonical_asset_uid', 'created_at'],
+    title: 'CandidateEntityPublic'
+} as const;
+
+export const CandidateEntityUpdateSchema = {
+    properties: {
+        canonical_asset_uid: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Canonical Asset Uid'
+        },
+        entity_type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Entity Type'
+        }
+    },
+    type: 'object',
+    title: 'CandidateEntityUpdate'
+} as const;
+
+export const CandidateEvidenceCreateSchema = {
+    properties: {
+        line_id: {
+            type: 'string',
+            title: 'Line Id'
+        },
+        quote: {
+            type: 'string',
+            title: 'Quote'
+        },
+        reason: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reason'
+        }
+    },
+    type: 'object',
+    required: ['line_id', 'quote'],
+    title: 'CandidateEvidenceCreate'
+} as const;
+
+export const CandidateEvidencePublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        candidate_uid: {
+            type: 'string',
+            title: 'Candidate Uid'
+        },
+        line_id: {
+            type: 'string',
+            title: 'Line Id'
+        },
+        quote: {
+            type: 'string',
+            title: 'Quote'
+        },
+        reason: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reason'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['uid', 'candidate_uid', 'line_id', 'quote', 'reason', 'created_at'],
+    title: 'CandidateEvidencePublic'
+} as const;
+
+export const CanonicalAssetAliasCreateSchema = {
+    properties: {
+        alias: {
+            type: 'string',
+            title: 'Alias'
+        }
+    },
+    type: 'object',
+    required: ['alias'],
+    title: 'CanonicalAssetAliasCreate'
+} as const;
+
+export const CanonicalAssetAliasPublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        asset_uid: {
+            type: 'string',
+            title: 'Asset Uid'
+        },
+        alias: {
+            type: 'string',
+            title: 'Alias'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['uid', 'asset_uid', 'alias', 'created_at'],
+    title: 'CanonicalAssetAliasPublic'
+} as const;
+
+export const CanonicalAssetCreateSchema = {
+    properties: {
+        project_uid: {
+            type: 'string',
+            title: 'Project Uid'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        type: {
+            type: 'string',
+            title: 'Type'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        aliases: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Aliases',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['project_uid', 'name', 'type'],
+    title: 'CanonicalAssetCreate'
+} as const;
+
+export const CanonicalAssetPublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        project_uid: {
+            type: 'string',
+            title: 'Project Uid'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        type: {
+            type: 'string',
+            title: 'Type'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        },
+        aliases: {
+            items: {
+                '$ref': '#/components/schemas/CanonicalAssetAliasPublic'
+            },
+            type: 'array',
+            title: 'Aliases',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['uid', 'project_uid', 'name', 'type', 'description', 'created_at', 'updated_at'],
+    title: 'CanonicalAssetPublic'
+} as const;
+
+export const CanonicalAssetUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Type'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    title: 'CanonicalAssetUpdate'
+} as const;
+
+export const ExtractionRunCreateSchema = {
+    properties: {
+        project_uid: {
+            type: 'string',
+            title: 'Project Uid'
+        },
+        script_uid: {
+            type: 'string',
+            title: 'Script Uid'
+        },
+        step: {
+            type: 'integer',
+            title: 'Step'
+        },
+        model_config_dict: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Model Config Dict'
+        }
+    },
+    type: 'object',
+    required: ['project_uid', 'script_uid', 'step'],
+    title: 'ExtractionRunCreate'
+} as const;
+
+export const ExtractionRunPublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        project_uid: {
+            type: 'string',
+            title: 'Project Uid'
+        },
+        script_uid: {
+            type: 'string',
+            title: 'Script Uid'
+        },
+        step: {
+            type: 'integer',
+            title: 'Step'
+        },
+        status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Status'
+        },
+        error_message: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Error Message'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        finished_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Finished At'
+        }
+    },
+    type: 'object',
+    required: ['uid', 'project_uid', 'script_uid', 'step', 'status', 'created_at', 'finished_at'],
+    title: 'ExtractionRunPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -212,6 +638,41 @@ export const NewPasswordSchema = {
     title: 'NewPassword'
 } as const;
 
+export const NormalizedScriptPublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        script_uid: {
+            type: 'string',
+            title: 'Script Uid'
+        },
+        version: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Version'
+        },
+        content_json: {
+            title: 'Content Json'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['uid', 'script_uid', 'version', 'content_json', 'created_at'],
+    title: 'NormalizedScriptPublic'
+} as const;
+
 export const PrivateUserCreateSchema = {
     properties: {
         email: {
@@ -235,6 +696,139 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const ProjectCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'ProjectCreate'
+} as const;
+
+export const ProjectPublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['uid', 'name', 'created_at'],
+    title: 'ProjectPublic'
+} as const;
+
+export const ScriptCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        content: {
+            type: 'string',
+            title: 'Content'
+        }
+    },
+    type: 'object',
+    required: ['name', 'content'],
+    title: 'ScriptCreate'
+} as const;
+
+export const ScriptDetailPublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        content: {
+            type: 'string',
+            title: 'Content'
+        },
+        project_uid: {
+            type: 'string',
+            title: 'Project Uid'
+        }
+    },
+    type: 'object',
+    required: ['uid', 'name', 'created_at', 'content', 'project_uid'],
+    title: 'ScriptDetailPublic'
+} as const;
+
+export const ScriptListPublicSchema = {
+    properties: {
+        uid: {
+            type: 'string',
+            title: 'Uid'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['uid', 'name', 'created_at'],
+    title: 'ScriptListPublic'
 } as const;
 
 export const TokenSchema = {

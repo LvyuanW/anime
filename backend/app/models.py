@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from pydantic import EmailStr
@@ -121,16 +121,40 @@ class Project(SQLModel, table=True):
     uid: str = Field(primary_key=True)
     name: str
     description: str | None = None
-    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
     updated_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True), onupdate=func.now()))
+
+class ProjectCreate(SQLModel):
+    name: str
+    description: str | None = None
+
+class ProjectPublic(SQLModel):
+    uid: str
+    name: str
+    description: str | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
 
 class Script(SQLModel, table=True):
     uid: str = Field(primary_key=True)
     project_uid: str = Field(index=True)
     name: str
     content: str
-    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
     updated_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True), onupdate=func.now()))
+
+class ScriptCreate(SQLModel):
+    name: str
+    content: str
+
+class ScriptListPublic(SQLModel):
+    uid: str
+    name: str
+    created_at: datetime
+
+class ScriptDetailPublic(ScriptListPublic):
+    content: str
+    project_uid: str
 
 class NormalizedScript(SQLModel, table=True):
     __tablename__ = "normalized_script"
@@ -138,7 +162,14 @@ class NormalizedScript(SQLModel, table=True):
     script_uid: str = Field(index=True)
     version: str | None = None
     content_json: Any = Field(sa_column=Column(JSON, nullable=False))
-    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+
+class NormalizedScriptPublic(SQLModel):
+    uid: str
+    script_uid: str
+    version: str | None
+    content_json: Any
+    created_at: datetime
 
 class ExtractionRun(SQLModel, table=True):
     __tablename__ = "extraction_run"
@@ -147,16 +178,33 @@ class ExtractionRun(SQLModel, table=True):
     script_uid: str = Field(index=True)
     step: int
     status: str | None = None
+    error_message: str | None = None
     model_config_data: Any | None = Field(default=None, sa_column=Column("model_config", JSON))
-    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
     finished_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True)))
+
+class ExtractionRunCreate(SQLModel):
+    project_uid: str
+    script_uid: str
+    step: int
+    model_config_dict: dict[str, Any] | None = Field(default=None, alias="model_config")
+
+class ExtractionRunPublic(SQLModel):
+    uid: str
+    project_uid: str
+    script_uid: str
+    step: int
+    status: str | None
+    error_message: str | None = None
+    created_at: datetime
+    finished_at: datetime | None
 
 class ArtifactSnapshot(SQLModel, table=True):
     __tablename__ = "artifact_snapshot"
     uid: str = Field(primary_key=True)
     run_uid: str = Field(index=True)
     content_json: Any = Field(sa_column=Column(JSON, nullable=False))
-    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
 
 class CandidateEntity(SQLModel, table=True):
     __tablename__ = "candidate_entity"
@@ -167,7 +215,7 @@ class CandidateEntity(SQLModel, table=True):
     confidence: float | None = None
     canonical_asset_uid: str | None = Field(default=None, index=True)
     is_deleted: bool = Field(default=False)
-    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
 
 class CandidateEvidence(SQLModel, table=True):
     __tablename__ = "candidate_evidence"
@@ -177,7 +225,41 @@ class CandidateEvidence(SQLModel, table=True):
     quote: str
     reason: str | None = None
     is_deleted: bool = Field(default=False)
-    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+
+class CandidateEvidenceCreate(SQLModel):
+    line_id: str
+    quote: str
+    reason: str | None = None
+
+class CandidateEvidencePublic(SQLModel):
+    uid: str
+    candidate_uid: str
+    line_id: str
+    quote: str
+    reason: str | None
+    created_at: datetime
+
+class CandidateEntityCreate(SQLModel):
+    run_uid: str
+    raw_name: str
+    entity_type: str
+    confidence: float | None = None
+    evidences: list[CandidateEvidenceCreate] = []
+
+class CandidateEntityUpdate(SQLModel):
+    canonical_asset_uid: str | None = None
+    entity_type: str | None = None
+
+class CandidateEntityPublic(SQLModel):
+    uid: str
+    run_uid: str
+    raw_name: str
+    entity_type: str
+    confidence: float | None
+    canonical_asset_uid: str | None
+    created_at: datetime
+    evidences: list[CandidateEvidencePublic] = []
 
 class CanonicalAsset(SQLModel, table=True):
     __tablename__ = "canonical_asset"
@@ -187,9 +269,46 @@ class CanonicalAsset(SQLModel, table=True):
     run_uid: str | None = Field(default=None, index=True)
     name: str
     type: str
-    aliases: Any | None = Field(default=None, sa_column=Column(JSON))
     description: str | None = None
     status: str
     is_deleted: bool = Field(default=False)
-    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
     updated_at: datetime | None = Field(default=None, sa_column=Column(DateTime(timezone=True), onupdate=func.now()))
+
+class CanonicalAssetAlias(SQLModel, table=True):
+    __tablename__ = "canonical_asset_alias"
+    uid: str = Field(primary_key=True)
+    asset_uid: str = Field(index=True)
+    alias: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+
+class CanonicalAssetAliasCreate(SQLModel):
+    alias: str
+
+class CanonicalAssetAliasPublic(SQLModel):
+    uid: str
+    asset_uid: str
+    alias: str
+    created_at: datetime
+
+class CanonicalAssetCreate(SQLModel):
+    project_uid: str
+    name: str
+    type: str
+    description: str | None = None
+    aliases: list[str] = []
+
+class CanonicalAssetUpdate(SQLModel):
+    name: str | None = None
+    type: str | None = None
+    description: str | None = None
+
+class CanonicalAssetPublic(SQLModel):
+    uid: str
+    project_uid: str
+    name: str
+    type: str
+    description: str | None
+    created_at: datetime
+    updated_at: datetime | None
+    aliases: list[CanonicalAssetAliasPublic] = []

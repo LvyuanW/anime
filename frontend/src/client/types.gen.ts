@@ -9,6 +9,93 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type CandidateEntityPublic = {
+    uid: string;
+    run_uid: string;
+    raw_name: string;
+    entity_type: string;
+    confidence: (number | null);
+    canonical_asset_uid: (string | null);
+    created_at: string;
+    evidences?: Array<CandidateEvidencePublic>;
+};
+
+export type CandidateEntityUpdate = {
+    canonical_asset_uid?: (string | null);
+    entity_type?: (string | null);
+};
+
+export type CandidateEvidenceCreate = {
+    line_id: string;
+    quote: string;
+    reason?: (string | null);
+};
+
+export type CandidateEvidencePublic = {
+    uid: string;
+    candidate_uid: string;
+    line_id: string;
+    quote: string;
+    reason: (string | null);
+    created_at: string;
+};
+
+export type CanonicalAssetAliasCreate = {
+    alias: string;
+};
+
+export type CanonicalAssetAliasPublic = {
+    uid: string;
+    asset_uid: string;
+    alias: string;
+    created_at: string;
+};
+
+export type CanonicalAssetCreate = {
+    project_uid: string;
+    name: string;
+    type: string;
+    description?: (string | null);
+    aliases?: Array<(string)>;
+};
+
+export type CanonicalAssetPublic = {
+    uid: string;
+    project_uid: string;
+    name: string;
+    type: string;
+    description: (string | null);
+    created_at: string;
+    updated_at: (string | null);
+    aliases?: Array<CanonicalAssetAliasPublic>;
+};
+
+export type CanonicalAssetUpdate = {
+    name?: (string | null);
+    type?: (string | null);
+    description?: (string | null);
+};
+
+export type ExtractionRunCreate = {
+    project_uid: string;
+    script_uid: string;
+    step: number;
+    model_config_dict?: ({
+    [key: string]: unknown;
+} | null);
+};
+
+export type ExtractionRunPublic = {
+    uid: string;
+    project_uid: string;
+    script_uid: string;
+    step: number;
+    status: (string | null);
+    error_message?: (string | null);
+    created_at: string;
+    finished_at: (string | null);
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -44,11 +131,51 @@ export type NewPassword = {
     new_password: string;
 };
 
+export type NormalizedScriptPublic = {
+    uid: string;
+    script_uid: string;
+    version: (string | null);
+    content_json: unknown;
+    created_at: string;
+};
+
 export type PrivateUserCreate = {
     email: string;
     password: string;
     full_name: string;
     is_verified?: boolean;
+};
+
+export type ProjectCreate = {
+    name: string;
+    description?: (string | null);
+};
+
+export type ProjectPublic = {
+    uid: string;
+    name: string;
+    description?: (string | null);
+    created_at: string;
+    updated_at?: (string | null);
+};
+
+export type ScriptCreate = {
+    name: string;
+    content: string;
+};
+
+export type ScriptDetailPublic = {
+    uid: string;
+    name: string;
+    created_at: string;
+    content: string;
+    project_uid: string;
+};
+
+export type ScriptListPublic = {
+    uid: string;
+    name: string;
+    created_at: string;
 };
 
 export type Token = {
@@ -106,6 +233,73 @@ export type ValidationError = {
     msg: string;
     type: string;
 };
+
+export type AliasesDeleteAliasData = {
+    uid: string;
+};
+
+export type AliasesDeleteAliasResponse = (unknown);
+
+export type AssetsCreateAssetData = {
+    requestBody: CanonicalAssetCreate;
+};
+
+export type AssetsCreateAssetResponse = (CanonicalAssetPublic);
+
+export type AssetsReadAssetsData = {
+    limit?: number;
+    projectUid?: (string | null);
+    skip?: number;
+    type?: (string | null);
+};
+
+export type AssetsReadAssetsResponse = (Array<CanonicalAssetPublic>);
+
+export type AssetsReadAssetData = {
+    uid: string;
+};
+
+export type AssetsReadAssetResponse = (CanonicalAssetPublic);
+
+export type AssetsUpdateAssetData = {
+    requestBody: CanonicalAssetUpdate;
+    uid: string;
+};
+
+export type AssetsUpdateAssetResponse = (CanonicalAssetPublic);
+
+export type AssetsCreateAssetAliasData = {
+    requestBody: CanonicalAssetAliasCreate;
+    uid: string;
+};
+
+export type AssetsCreateAssetAliasResponse = (CanonicalAssetAliasPublic);
+
+export type CandidatesUpdateCandidateData = {
+    requestBody: CandidateEntityUpdate;
+    uid: string;
+};
+
+export type CandidatesUpdateCandidateResponse = (CandidateEntityPublic);
+
+export type CandidatesDeleteCandidateData = {
+    uid: string;
+};
+
+export type CandidatesDeleteCandidateResponse = (unknown);
+
+export type CandidatesCreateEvidenceData = {
+    requestBody: CandidateEvidenceCreate;
+    uid: string;
+};
+
+export type CandidatesCreateEvidenceResponse = (CandidateEvidencePublic);
+
+export type EvidencesDeleteEvidenceData = {
+    uid: string;
+};
+
+export type EvidencesDeleteEvidenceResponse = (unknown);
 
 export type ItemsReadItemsData = {
     limit?: number;
@@ -170,6 +364,78 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type ProjectsCreateProjectData = {
+    requestBody: ProjectCreate;
+};
+
+export type ProjectsCreateProjectResponse = (ProjectPublic);
+
+export type ProjectsReadProjectsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ProjectsReadProjectsResponse = (Array<ProjectPublic>);
+
+export type ProjectsReadProjectData = {
+    uid: string;
+};
+
+export type ProjectsReadProjectResponse = (ProjectPublic);
+
+export type ProjectsCreateProjectScriptData = {
+    projectUid: string;
+    requestBody: ScriptCreate;
+};
+
+export type ProjectsCreateProjectScriptResponse = (ScriptListPublic);
+
+export type ProjectsReadProjectScriptsData = {
+    limit?: number;
+    projectUid: string;
+    skip?: number;
+};
+
+export type ProjectsReadProjectScriptsResponse = (Array<ScriptListPublic>);
+
+export type RunsCreateRunData = {
+    requestBody: ExtractionRunCreate;
+};
+
+export type RunsCreateRunResponse = (ExtractionRunPublic);
+
+export type RunsReadRunData = {
+    uid: string;
+};
+
+export type RunsReadRunResponse = (ExtractionRunPublic);
+
+export type RunsReadRunCandidatesData = {
+    entityType?: (string | null);
+    uid: string;
+};
+
+export type RunsReadRunCandidatesResponse = (Array<CandidateEntityPublic>);
+
+export type ScriptsReadScriptData = {
+    uid: string;
+};
+
+export type ScriptsReadScriptResponse = (ScriptDetailPublic);
+
+export type ScriptsReadNormalizedScriptData = {
+    uid: string;
+    version?: (string | null);
+};
+
+export type ScriptsReadNormalizedScriptResponse = (NormalizedScriptPublic);
+
+export type ScriptsReadScriptRunsData = {
+    uid: string;
+};
+
+export type ScriptsReadScriptRunsResponse = (Array<ExtractionRunPublic>);
 
 export type UsersReadUsersData = {
     limit?: number;
