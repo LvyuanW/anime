@@ -43,10 +43,35 @@
 ### 推荐架构（最小改动、可控演进）
 - 独立服务（LLM Orchestrator）负责：
   - 拉取输入（通过后端 API）
-  - 调用 LLM（可插拔 provider）
+  - 调用 LLM（统一 LLM Client + 可插拔 provider）
   - 解析/校验输出（JSON schema 校验 + 规则校验）
   - 写回结果（通过后端 API 或直连 DB）
   - 记录运行状态与产物快照
+
+### 统一 LLM Client（你的“LLM API 调用功能”）
+将所有上游模型调用能力收敛为一个模块，所有 step 复用它，只差参数与提示词：
+- 输入：`model`、`api_base_url`、`api_key`、`messages`、`temperature/max_tokens` 等
+- 输出：原始响应 JSON + 便捷字段（如首条 message content）
+- 必备能力边界：
+  - 超时与重试（带退避）
+  - 错误归一（网络错误/HTTP 非 2xx/模型报错统一成可读结构）
+  - 限流与并发控制（防止长剧本并发打爆）
+  - JSON-only 约束支持（强制返回合法 JSON；失败重试有限次）
+  - 记录调用元数据（不落库密钥，不打印密钥）
+
+### StepHandler 抽象（step 之间只差输入/输出/提示词）
+把每一步的差异点封装成 handler，Orchestrator 只负责编排与通用能力：
+- `build_inputs()`：从后端/数据库取数，并裁剪为 LLM 输入（分片、召回、上下文截断）
+- `build_prompt()`：选择提示词文件并注入变量（提示词文件版本 hash 必须被记录）
+- `parse_output()`：解析 LLM 输出为结构化对象（严格 JSON）
+- `validate()`：字段白名单、枚举校验、长度限制、必要的保守规则
+- `writeback()`：写回 run/candidates/assets/snapshot
+
+建议的目录与职责（仅约定，不要求一次性到位）：
+- `llm_service/llm_client/*`：统一 LLM Client
+- `llm_service/steps/step1.py`、`step2.py`、`step3.py`：各自的 StepHandler
+- `llm_service/prompts.py`：提示词读取与 hash
+- `llm_service/jobs/*`：作业状态、断点续跑、幂等控制
 
 ### 写回方式的两种方案
 - 方案 A：直连数据库写入（最快落地）
@@ -64,6 +89,11 @@
 - `POST /jobs/step2`：参数 `{project_uid, script_uid}`，返回 `{job_uid, run_uid}`
 - `POST /jobs/step3`：参数 `{project_uid, script_uid, source_run_uid}`，返回 `{job_uid, run_uid}`
 - `GET /jobs/{job_uid}`：返回状态、进度、错误信息、关联 run_uid
+
+### 触发与写回边界（明确你的调用方式）
+- 上游“LLM业务接口”（例如前端按钮、运营任务、定时器）只负责调用 LLM 服务的 `/jobs/stepX`，不直接写候选/资产数据。
+- LLM 服务对“写回结果”负责到底：创建运行记录、落库产物、更新状态、写 snapshot。
+- 上游系统只读后端现有查询接口用于展示（候选列表、资产列表等）。
 
 ### 对内（写回后端或数据库）
 如果采用方案 B，后端需要补充：
