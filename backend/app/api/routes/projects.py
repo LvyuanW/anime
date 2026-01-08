@@ -47,7 +47,6 @@ def create_project_script(*, session: SessionDep, project_uid: str, script_in: S
     project = session.get(Project, project_uid)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-        
     script = Script.model_validate(script_in, update={
         "uid": f"script_{uuid.uuid4().hex}",
         "project_uid": project_uid

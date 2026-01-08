@@ -1,4 +1,3 @@
-import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -16,7 +15,6 @@ def delete_alias(*, session: SessionDep, uid: str) -> Any:
     alias = session.get(CanonicalAssetAlias, uid)
     if not alias:
         raise HTTPException(status_code=404, detail="Alias not found")
-        
     session.delete(alias)
     session.commit()
     return {"message": "Alias deleted successfully"}

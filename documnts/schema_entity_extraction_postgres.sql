@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS normalized_script (
   uid TEXT PRIMARY KEY,
   script_uid TEXT NOT NULL,
   version TEXT,
-  content_json JSONB NOT NULL,
+  content_json JSON NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS extraction_run (
   script_uid TEXT NOT NULL,
   step INTEGER NOT NULL,
   status TEXT,
-  model_config JSONB,
+  error_message TEXT,
+  model_config JSON,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   finished_at TIMESTAMPTZ
 );
@@ -44,7 +45,7 @@ CREATE INDEX IF NOT EXISTS extraction_run_script_uid_idx ON extraction_run (scri
 CREATE TABLE IF NOT EXISTS artifact_snapshot (
   uid TEXT PRIMARY KEY,
   run_uid TEXT NOT NULL,
-  content_json JSONB NOT NULL,
+  content_json JSON NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -64,25 +65,12 @@ CREATE TABLE IF NOT EXISTS candidate_entity (
 CREATE INDEX IF NOT EXISTS candidate_entity_run_uid_idx ON candidate_entity (run_uid);
 CREATE INDEX IF NOT EXISTS candidate_entity_canonical_asset_uid_idx ON candidate_entity (canonical_asset_uid);
 
-CREATE TABLE IF NOT EXISTS candidate_evidence (
-  uid TEXT PRIMARY KEY,
-  candidate_uid TEXT NOT NULL,
-  line_id TEXT NOT NULL,
-  quote TEXT NOT NULL,
-  reason TEXT,
-  is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS candidate_evidence_candidate_uid_idx ON candidate_evidence (candidate_uid);
-
 CREATE TABLE IF NOT EXISTS canonical_asset (
   uid TEXT PRIMARY KEY,
   project_uid TEXT NOT NULL,
   run_uid TEXT,
   name TEXT NOT NULL,
   type TEXT NOT NULL,
-  aliases JSONB,
   description TEXT,
   status TEXT NOT NULL,
   is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
@@ -92,3 +80,13 @@ CREATE TABLE IF NOT EXISTS canonical_asset (
 
 CREATE INDEX IF NOT EXISTS canonical_asset_project_uid_type_idx ON canonical_asset (project_uid, type);
 CREATE INDEX IF NOT EXISTS canonical_asset_run_uid_idx ON canonical_asset (run_uid);
+CREATE INDEX IF NOT EXISTS canonical_asset_project_uid_idx ON canonical_asset (project_uid);
+
+CREATE TABLE IF NOT EXISTS canonical_asset_alias (
+  uid TEXT PRIMARY KEY,
+  asset_uid TEXT NOT NULL,
+  alias TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS canonical_asset_alias_asset_uid_idx ON canonical_asset_alias (asset_uid);

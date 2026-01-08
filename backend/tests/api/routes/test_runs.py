@@ -6,7 +6,7 @@ def test_create_and_read_run(client: TestClient) -> None:
     proj_data = {"name": "Proj Run", "description": "Desc"}
     proj_resp = client.post(f"{settings.API_V1_STR}/projects/", json=proj_data)
     project_uid = proj_resp.json()["uid"]
-    
+
     script_data = {"name": "Ep1", "content": "..."}
     script_resp = client.post(f"{settings.API_V1_STR}/projects/{project_uid}/scripts/", json=script_data)
     script_uid = script_resp.json()["uid"]

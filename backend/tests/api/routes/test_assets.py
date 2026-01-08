@@ -41,7 +41,7 @@ def test_canonical_assets(client: TestClient) -> None:
     resp = client.post(f"{settings.API_V1_STR}/assets/{asset_uid}/aliases", json={"alias": "A3"})
     assert resp.status_code == 200
     alias_uid = resp.json()["uid"]
-    
+
     # Verify alias added
     resp = client.get(f"{settings.API_V1_STR}/assets/{asset_uid}")
     assert len(resp.json()["aliases"]) == 3
@@ -49,7 +49,7 @@ def test_canonical_assets(client: TestClient) -> None:
     # 7. Delete Alias
     resp = client.delete(f"{settings.API_V1_STR}/aliases/{alias_uid}")
     assert resp.status_code == 200
-    
+
     # Verify deleted
     resp = client.get(f"{settings.API_V1_STR}/assets/{asset_uid}")
     assert len(resp.json()["aliases"]) == 2

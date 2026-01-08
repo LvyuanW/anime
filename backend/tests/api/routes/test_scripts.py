@@ -15,7 +15,7 @@ def test_create_and_read_script(client: TestClient) -> None:
     script_json = script_resp.json()
     assert script_json["name"] == script_data["name"]
     # List view shouldn't have content
-    assert "content" not in script_json 
+    assert "content" not in script_json
     script_uid = script_json["uid"]
 
     # 3. Read Script Detail
@@ -23,7 +23,7 @@ def test_create_and_read_script(client: TestClient) -> None:
     assert detail_resp.status_code == 200
     detail_json = detail_resp.json()
     assert detail_json["content"] == script_data["content"]
-    
+
     # 4. List Scripts
     list_resp = client.get(f"{settings.API_V1_STR}/projects/{project_uid}/scripts/")
     assert list_resp.status_code == 200

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import EmailStr
 from sqlalchemy import Column, DateTime, Index, JSON, func
@@ -217,35 +217,12 @@ class CandidateEntity(SQLModel, table=True):
     is_deleted: bool = Field(default=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
 
-class CandidateEvidence(SQLModel, table=True):
-    __tablename__ = "candidate_evidence"
-    uid: str = Field(primary_key=True)
-    candidate_uid: str = Field(index=True)
-    line_id: str
-    quote: str
-    reason: str | None = None
-    is_deleted: bool = Field(default=False)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
-
-class CandidateEvidenceCreate(SQLModel):
-    line_id: str
-    quote: str
-    reason: str | None = None
-
-class CandidateEvidencePublic(SQLModel):
-    uid: str
-    candidate_uid: str
-    line_id: str
-    quote: str
-    reason: str | None
-    created_at: datetime
 
 class CandidateEntityCreate(SQLModel):
     run_uid: str
     raw_name: str
     entity_type: str
     confidence: float | None = None
-    evidences: list[CandidateEvidenceCreate] = []
 
 class CandidateEntityUpdate(SQLModel):
     canonical_asset_uid: str | None = None
@@ -259,7 +236,6 @@ class CandidateEntityPublic(SQLModel):
     confidence: float | None
     canonical_asset_uid: str | None
     created_at: datetime
-    evidences: list[CandidateEvidencePublic] = []
 
 class CanonicalAsset(SQLModel, table=True):
     __tablename__ = "canonical_asset"

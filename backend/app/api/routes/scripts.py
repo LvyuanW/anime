@@ -1,11 +1,17 @@
-import uuid
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 
 from app.api.deps import SessionDep
-from app.models import Script, ScriptDetailPublic, NormalizedScript, NormalizedScriptPublic, ExtractionRun, ExtractionRunPublic
+from app.models import (
+    ExtractionRun,
+    ExtractionRunPublic,
+    NormalizedScript,
+    NormalizedScriptPublic,
+    Script,
+    ScriptDetailPublic,
+)
 
 router = APIRouter()
 
@@ -26,19 +32,19 @@ def read_normalized_script(*, session: SessionDep, uid: str, version: str | None
     """
     script = session.get(Script, uid)
     if not script:
-         raise HTTPException(status_code=404, detail="Script not found")
+        raise HTTPException(status_code=404, detail="Script not found")
 
     query = select(NormalizedScript).where(NormalizedScript.script_uid == uid)
     if version:
         query = query.where(NormalizedScript.version == version)
     else:
         # Get latest
-        query = query.order_by(NormalizedScript.created_at.desc())
-    
+        query = query.order_by(cast(Any, NormalizedScript.created_at).desc())
+
     normalized = session.exec(query).first()
     if not normalized:
         raise HTTPException(status_code=404, detail="Normalized script not found")
-    
+
     return normalized
 
 @router.get("/{uid}/runs", response_model=list[ExtractionRunPublic])
@@ -49,7 +55,11 @@ def read_script_runs(*, session: SessionDep, uid: str) -> Any:
     script = session.get(Script, uid)
     if not script:
         raise HTTPException(status_code=404, detail="Script not found")
-        
-    statement = select(ExtractionRun).where(ExtractionRun.script_uid == uid).order_by(ExtractionRun.created_at.desc())
+
+    statement = (
+        select(ExtractionRun)
+        .where(ExtractionRun.script_uid == uid)
+        .order_by(cast(Any, ExtractionRun.created_at).desc())
+    )
     runs = session.exec(statement).all()
     return runs

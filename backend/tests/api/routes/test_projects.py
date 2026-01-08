@@ -1,6 +1,4 @@
 from fastapi.testclient import TestClient
-from sqlmodel import Session
-
 from app.core.config import settings
 
 def test_create_project(client: TestClient) -> None:
@@ -29,7 +27,7 @@ def test_read_project(client: TestClient) -> None:
         json=data,
     )
     uid = create_resp.json()["uid"]
-    
+
     response = client.get(f"{settings.API_V1_STR}/projects/{uid}")
     assert response.status_code == 200
     content = response.json()

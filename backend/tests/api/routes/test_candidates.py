@@ -2,9 +2,9 @@ import uuid
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 from app.core.config import settings
-from app.models import CandidateEntity, CandidateEvidence
+from app.models import CandidateEntity
 
-def test_candidates_and_evidences(client: TestClient, db: Session) -> None:
+def test_candidates_basic_flow(client: TestClient, db: Session) -> None:
     # 1. Setup Data
     # Manually create run/project/script to save time or via API
     # Let's use API
@@ -29,25 +29,12 @@ def test_candidates_and_evidences(client: TestClient, db: Session) -> None:
     db.add(cand)
     db.commit()
     
-    # Add evidence
-    ev_uid_manual = f"ev_{uuid.uuid4().hex}"
-    ev = CandidateEvidence(
-        uid=ev_uid_manual,
-        candidate_uid=cand_uid,
-        line_id="L1",
-        quote="Quote"
-    )
-    db.add(ev)
-    db.commit()
-
     # 2. Get Candidates
     resp = client.get(f"{settings.API_V1_STR}/runs/{run_uid}/candidates")
     assert resp.status_code == 200
     data = resp.json()
     assert len(data) == 1
     assert data[0]["uid"] == cand_uid
-    assert len(data[0]["evidences"]) == 1
-    assert data[0]["evidences"][0]["uid"] == ev_uid_manual
 
     # 3. Update Candidate
     patch_data = {"canonical_asset_uid": "asset_123", "entity_type": "prop"}
@@ -56,27 +43,7 @@ def test_candidates_and_evidences(client: TestClient, db: Session) -> None:
     assert resp.json()["canonical_asset_uid"] == "asset_123"
     assert resp.json()["entity_type"] == "prop"
 
-    # 4. Add Evidence
-    ev_data = {"line_id": "L2", "quote": "New Quote"}
-    resp = client.post(f"{settings.API_V1_STR}/candidates/{cand_uid}/evidences", json=ev_data)
-    assert resp.status_code == 200
-    ev_uid = resp.json()["uid"]
-    
-    # Verify added
-    resp = client.get(f"{settings.API_V1_STR}/runs/{run_uid}/candidates")
-    assert len(resp.json()[0]["evidences"]) == 2
-
-    # 5. Delete Evidence
-    resp = client.delete(f"{settings.API_V1_STR}/evidences/{ev_uid}")
-    assert resp.status_code == 200
-    
-    # Verify deleted
-    resp = client.get(f"{settings.API_V1_STR}/runs/{run_uid}/candidates")
-    evs = resp.json()[0]["evidences"]
-    assert len(evs) == 1
-    assert evs[0]["uid"] == ev_uid_manual
-
-    # 6. Delete Candidate
+    # 4. Delete Candidate
     resp = client.delete(f"{settings.API_V1_STR}/candidates/{cand_uid}")
     assert resp.status_code == 200
     
